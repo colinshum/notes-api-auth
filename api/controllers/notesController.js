@@ -10,6 +10,13 @@ exports.listNotes = function(req, res) {
   });
 };
 
+exports.getPinned = function(req, res) {
+  Note.find({'pinned': true}, function(err, note) {
+    if (err) return res.send(err);
+    res.json(note);
+  });
+};
+
 exports.createNote = function(req, res) {
   var newNote = new Note(req.body);
   newNote.save(function(err, note) {

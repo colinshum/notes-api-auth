@@ -21,16 +21,7 @@ app.set('secretKey', db.secretKey);
 // Connect to MongoDB
 mongoose.connect(db.uri, { useMongoClient: true });
 
-apiRoutes.post('/register', function(req, res) {
-  var newUser = new User(req.body);
-
-  newUser.save(function(err, user) {
-    if (err) throw err;
-    return res.json(user);
-  })
-});
-
-apiRoutes.post('/authenticate', function(req, res) {
+app.post('/authenticate', function(req, res) {
   User.findOne({username: req.body.username}, function(err, user) {
     if (err) throw err;
 
@@ -53,41 +44,8 @@ apiRoutes.post('/authenticate', function(req, res) {
   });
 });
 
-apiRoutes.use(function(req, res, next) {
-
-  // check header or url parameters or post parameters for token
-  var token = req.body.token || req.query.token || req.headers['x-access-token'];
-
-  // decode token
-  if (token) {
-
-    jwt.verify(token, app.get('secretKey'), function(err, decoded) {
-      if (err) {
-        return res.json({ success: false, message: 'Failed to authenticate token.' });
-      } else {
-        // if everything is good, save to request for use in other routes
-        req.decoded = decoded;
-        next();
-      }
-    });
-
-  } else {
-    return res.status(403).send({
-        success: false,
-        message: 'No token provided.'
-    });
-  }
-});
-
-apiRoutes.get('/users', function(req, res) {
-  User.find({}, function(err, user) {
-    res.json(user);
-  });
-});
-
-app.use('/api', apiRoutes);
-var routes = require('./api/routes/notesRoute');
-routes(app);
+var apiRoute = require('./api/routes/apiRoute');
+apiRoute(app);
 
 app.listen(3000, () => {
   console.log('App is running on port 3000...');
