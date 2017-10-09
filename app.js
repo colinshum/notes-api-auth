@@ -7,6 +7,7 @@ var mongoose = require('mongoose');
 var db = require('./config/db');
 var User = require('./api/models/userModel');
 var Note = require('./api/models/notesModel');
+var Cls = require('./api/models/classModel');
 
 
 // Instantiate Express and router

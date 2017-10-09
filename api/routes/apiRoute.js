@@ -4,6 +4,7 @@ module.exports = function(apiRoutes) {
   var User = require('../models/userModel');
   var app = apiRoutes;
   var config = require('../../config/db');
+  var Class = require('../models/classModel');
   //var secretKey = config.secretKey;
 
   apiRoutes.use(function(req, res, next) {
@@ -40,6 +41,8 @@ module.exports = function(apiRoutes) {
     }
   });
 
-  var routes = require('../routes/notesRoute');
-  routes(app);
+  var notes = require('../routes/notesRoute');
+  notes(app);
+  var cls = require('../routes/classRoute');
+  cls(app);
 };
