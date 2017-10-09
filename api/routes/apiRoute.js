@@ -1,22 +1,19 @@
 module.exports = function(apiRoutes) {
-  //apiRoutes = express.Router();
 
   var jwt = require('jsonwebtoken');
-  var User = ('../models/userModel');
-
-  //apiRoutes
-
+  var User = require('../models/userModel');
   var app = apiRoutes;
+  var config = require('../../config/db');
+  //var secretKey = config.secretKey;
 
   apiRoutes.use(function(req, res, next) {
-
-    // check header or url parameters or post parameters for token
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
 
     if (token) {
       jwt.verify(token, app.get('secretKey'), function(err, decoded) {
         if (err) {
-          return res.json({ success: false, message: 'Failed to authenticate token.' });
+          return res.json({ success: false,
+            status: 'Failed to authenticate token.' });
         } else {
           req.decoded = decoded;
           next();
@@ -26,17 +23,23 @@ module.exports = function(apiRoutes) {
     } else {
       return res.status(403).send({
           success: false,
-          message: 'No token provided.'
+          status: 'No token provided.'
       });
 
     }
   });
 
-  apiRoutes.get('/users', function(req, res) {
-    User.find({}, function(err, user) {
-      res.json(user);
-    });
+  apiRoutes.get('/admin/users', function(req, res) {
+    var decoded = req.decoded;
+    if (decoded.user_class === 'admin') {
+      User.find({}, function(err, user) {
+        res.json(user);
+      });
+    } else {
+      res.send({success: false, message: 'Wrong user class: ' + decoded.user_class});
+    }
   });
+
   var routes = require('../routes/notesRoute');
   routes(app);
 };

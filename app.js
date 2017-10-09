@@ -9,20 +9,28 @@ var User = require('./api/models/userModel');
 var Note = require('./api/models/notesModel');
 
 
-// Instantiate Express and modules
+// Instantiate Express and router
 var app = express();
 var apiRoutes = express.Router();
+
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 app.set('secretKey', db.secretKey);
 
-
 // Connect to MongoDB
 mongoose.connect(db.uri, { useMongoClient: true });
 
-app.post('/authenticate', function(req, res) {
-  User.findOne({username: req.body.username}, function(err, user) {
+app.post('/register', function(req, res) {
+  var newUser = new User(req.body);
+  newUser.save(function(err, user) {
+    if (err) throw err;
+    return res.json(user);
+  });
+});
+
+app.post('/login', function(req, res) {
+  User.findOne({username: req.body.username.toLowerCase()}, function(err, user) {
     if (err) throw err;
 
     if (!user) {
@@ -31,7 +39,7 @@ app.post('/authenticate', function(req, res) {
       if (user.password != req.body.password) {
         res.json({ success: false, message: 'Authentication failed. User not found.' });
       } else {
-        const payload = {email: user.email};
+        const payload = {username: user.username, email: user.email, user_class: user.user_class};
         var token = jwt.sign(payload, app.get('secretKey'), {expiresIn: '1440m'});
 
         res.json({

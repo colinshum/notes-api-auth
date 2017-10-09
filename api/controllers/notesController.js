@@ -2,6 +2,7 @@
 
 var mongoose = require('mongoose');
 var Note = mongoose.model('Notes');
+//var Note = require('../models/notesModel');
 
 exports.listNotes = function(req, res) {
   Note.find({}, function(err, note) {
@@ -45,3 +46,10 @@ exports.deleteNote = function(req, res) {
     res.json({status: 'deleted note'});
   });
 };
+
+exports.getClass = function(req, res) {
+  Note.find({'class': req.params.class}, function(err, cls) {
+    if (err) return res.send({status: 'error'});
+    res.json(cls);
+  })
+}

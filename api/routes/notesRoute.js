@@ -3,15 +3,18 @@
 module.exports = function(app) {
   var notes = require('../controllers/notesController');
 
-  app.route('/api/notes')
+  app.route('/notes')
     .get(notes.listNotes)
     .post(notes.createNote)
 
-  app.route('/api/notes/:noteId')
+  app.route('/notes/:noteId')
     .get(notes.readNote)
     .put(notes.updateNote)
     .delete(notes.deleteNote)
 
-  app.route('/api/pinned')
+  app.route('/pinned')
     .get(notes.getPinned)
+
+  app.route('/notes/class/:class')
+    .get(notes.getClass)
 };
