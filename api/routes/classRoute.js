@@ -12,7 +12,6 @@ module.exports = function(app) {
 
   app.route('/class/:classId/students')
     .get(cls.studentsInClass)
-    //.put(cls.addStudent)
 
   app.route('/class/:classId/students/add')
     .post(cls.addStudent)

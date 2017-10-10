@@ -3,6 +3,8 @@
 var mongoose = require('mongoose');
 //var Note = mongoose.model('Notes');
 var Note = require('../models/notesModel');
+var User = require('../models/userModel');
+var jwt = require('jsonwebtoken');
 
 // listNotes() returns a JSON object of all notes at
 // GET /notes
@@ -44,6 +46,19 @@ exports.createNote = function(req, res) {
 // readNote() retrieves a note at GET /notes/id/:noteId
 exports.readNote = function(req, res) {
   Note.find({_id: req.params.noteId}, function(err, note) {
+    if (err) return res.send(err);
+    res.json(note);
+  });
+};
+
+exports.userNotes = function(req, res) {
+  var decoded = req.decoded;
+  var classes = [];
+  User.find({username: decoded.username}, function(err, user) {
+    classes = user.classes;
+  });
+
+  Note.find({name: {$in: classes}}, function(err, note) {
     if (err) return res.send(err);
     res.json(note);
   });

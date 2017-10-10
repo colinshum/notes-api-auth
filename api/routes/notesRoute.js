@@ -3,8 +3,10 @@
 module.exports = function(app) {
   var notes = require('../controllers/notesController');
 
-  app.route('/notes')
+  app.route('/notes/all')
     .get(notes.listNotes)
+  app.route('/notes')
+    .get(notes.userNotes)
     .post(notes.createNote)
 
   app.route('/notes/pinned')

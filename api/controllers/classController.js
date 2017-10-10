@@ -11,13 +11,18 @@ var writeAccess = ['admin', 'instructor'];
 
 
 exports.addClass = function(req, res) {
-  var newClass = new Class(req.body);
-  newClass.save(function(err, cls) {
-    if (err) {
-      return res.send(err);
-    }
-    return res.json(cls);
-  });
+  var decoded = req.decoded;
+  if (writeAccess.indexOf(decoded.user_class) != -1) {
+    var newClass = new Class(req.body);
+    newClass.save(function(err, cls) {
+      if (err) {
+        return res.send(err);
+      }
+      return res.json(cls);
+    });
+  } else {
+    return res.send({success: false, message: 'You are not authorized to add a class.'});
+  }
 };
 
 exports.deleteClass = function(req, res) {
@@ -82,7 +87,21 @@ exports.addStudent = function(req, res) {
           // If array is already at capacity
           res.send({success: false, message: 'Max students reached.'});
         } else {
+          var userClasses = [];
+
+          User.find({username: req.body.username}, function(err, user) {
+            if (err) throw err;
+            userClasses = user.classes;
+          });
+
+          userClasses.push(cls.name);
+
+          User.findOneAndUpdate({username: req.body.username}, {$set: {classes: userClasses}}, function(err, user) {
+            if (err) return res.send(err);
+          });
+
           students.push(req.body.username);
+
           Class.findOneAndUpdate({_id: req.params.classId}, {$set: {students: students}}, function(err, cls) {
             if (err) return res.send(err);
             return res.send({success: true, message: 'added ' + req.body.username + ' to class.'});
