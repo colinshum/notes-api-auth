@@ -8,7 +8,7 @@ var jwt = require('jsonwebtoken');
 
 // listNotes() returns a JSON object of all notes at
 // GET /notes
-// TODO: Implement notes only for classes a student is in.
+// TODO: [DONE] Implement notes only for classes a student is in.
 //       Array in userSchema (i.e. ['CS246', 'MATH239'])
 //       and only return those.
 
@@ -51,18 +51,23 @@ exports.readNote = function(req, res) {
   });
 };
 
+// userNotes() provides a user with only relevant notes
+// provided that they are enrolled in classes.
+
 exports.userNotes = function(req, res) {
   var decoded = req.decoded;
-  var classes = [];
-  User.find({username: decoded.username}, function(err, user) {
-    classes = user.classes;
+  console.log(decoded.username);
+  var userClasses = [];
+  User.findOne({username: decoded.username}, function(err, user) {
+    userClasses = user.classes;
+    Note.find({class: {$in: userClasses}}, function(err, note) {
+      if (err) return res.send(err);
+      console.log(userClasses);
+      console.log(note);
+      res.json(note);
+    }).sort({'pinned': -1});
   });
 
-  Note.find({name: {$in: classes}}, function(err, note) {
-    if (err) return res.send(err);
-    res.json(note);
-  });
-};
 
 // updateNote() updates a given Note at PUT /notes/id/:noteId
 // It does not require the entire object to be redefined.
