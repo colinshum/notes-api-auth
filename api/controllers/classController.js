@@ -8,6 +8,8 @@ var config = require('../../config/db');
 var secretKey = config.secretKey;
 var writeAccess = ['admin', 'instructor'];
 
+
+
 exports.addClass = function(req, res) {
   var newClass = new Class(req.body);
   newClass.save(function(err, cls) {

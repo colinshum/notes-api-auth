@@ -8,7 +8,7 @@ module.exports = function(app) {
     .post(notes.createNote)
 
   app.route('/notes/pinned')
-      .get(notes.getPinned)
+    .get(notes.getPinned)
 
   app.route('/notes/id/:noteId')
     .get(notes.readNote)
