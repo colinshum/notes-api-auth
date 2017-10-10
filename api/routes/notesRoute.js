@@ -7,13 +7,13 @@ module.exports = function(app) {
     .get(notes.listNotes)
     .post(notes.createNote)
 
-  app.route('/notes/:noteId')
+  app.route('/notes/pinned')
+      .get(notes.getPinned)
+
+  app.route('/notes/id/:noteId')
     .get(notes.readNote)
     .put(notes.updateNote)
     .delete(notes.deleteNote)
-
-  app.route('/pinned')
-    .get(notes.getPinned)
 
   app.route('/notes/class/:class')
     .get(notes.getClass)

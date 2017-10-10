@@ -7,7 +7,16 @@ module.exports = function(app) {
     .get(cls.listClasses)
     .post(cls.addClass)
 
+  app.route('/class/:classId')
+    .delete(cls.deleteClass)
+
   app.route('/class/:classId/students')
     .get(cls.studentsInClass)
-    //.put(cls.addStudentToClass)
+    //.put(cls.addStudent)
+
+  app.route('/class/:classId/students/add')
+    .post(cls.addStudent)
+
+  app.route('/class/:classId/students/delete')
+    .post(cls.deleteStudent)
 }

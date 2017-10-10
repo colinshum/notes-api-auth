@@ -18,7 +18,7 @@ var UserSchema = new Schema({
   },
   user_class: {
     type: String,
-    enum: ['general', 'admin'],
+    enum: ['general', 'instructor', 'admin'],
     default: 'general'
   },
   email: {

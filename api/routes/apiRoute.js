@@ -5,7 +5,7 @@ module.exports = function(apiRoutes) {
   var app = apiRoutes;
   var config = require('../../config/db');
   var Class = require('../models/classModel');
-  //var secretKey = config.secretKey;
+  var secretKey = config.secretKey;
 
   apiRoutes.use(function(req, res, next) {
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
@@ -28,6 +28,14 @@ module.exports = function(apiRoutes) {
       });
 
     }
+  });
+
+  apiRoutes.get('/me', function(req, res) {
+    var decoded = req.decoded;
+    User.find({username: decoded.username}, function(err, user) {
+      if (err) res.send(err);
+      return res.json(user);
+    });
   });
 
   apiRoutes.get('/admin/users', function(req, res) {
