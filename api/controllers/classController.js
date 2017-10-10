@@ -10,6 +10,7 @@ var writeAccess = ['admin', 'instructor'];
 
 // addClass() inserts a Class into the database @ POST /class
 // Requires user_class to be in writeAccess
+
 exports.addClass = function(req, res) {
   var decoded = req.decoded;
   if (writeAccess.indexOf(decoded.user_class) != -1) {
@@ -28,6 +29,7 @@ exports.addClass = function(req, res) {
 
 // addClass() deletes a Class from the database @ DELETE /class
 // Requires user_class to be in writeAccess
+
 exports.deleteClass = function(req, res) {
   var decoded = req.decoded;
   if (writeAccess.indexOf(decoded.user_class) != -1) {
@@ -55,6 +57,7 @@ exports.deleteClass = function(req, res) {
 }
 
 // listClasses() lists all classes @ GET /class
+
 exports.listClasses = function(req, res) {
   Class.find({}, function(err, cls) {
     if (err) {
@@ -65,6 +68,7 @@ exports.listClasses = function(req, res) {
 };
 
 // studentsInClass() lists all students in a class @ GET /class/:classId/students
+
 exports.studentsInClass = function(req, res) {
   Class.findById(req.params.classId, function(err, cls) {
     if (err) {
@@ -77,97 +81,117 @@ exports.studentsInClass = function(req, res) {
   });
 };
 
+// addStudent() adds a student to a class @ POST /class/:classId/students/add
+// Requires: User is a part of writeAccess user classes
+
 exports.addStudent = function(req, res) {
+  var decoded = req.decoded;
+  if (writeAccess.indexOf(decoded.user_class) != -1) {
   Class.findById(req.params.classId, function(err, cls) {
-    if (err) {
-      res.send(err);
-    } else if (!cls) {
-      // If class isn't found
-      res.send({success: false,
-        message: 'Class not found'});
-    } else {
-      var students = cls.students;
-      User.find({username: req.body.username}, function(err, user) {
-        if (err) {
-          res.send(err);
-        } else if (students.indexOf(req.body.username) > -1) {
-          // If username already exists in cls.students
-          res.send({success: false,
-            message: 'User already exists in class.'});
-        } else if ( students.length >= cls.maxStudents ) {
-          // If array is already at capacity
-          res.send({success: false,
-            message: 'Max students reached.'});
-        } else {
-          var userClasses = [];
+      if (err) {
+        res.send(err);
+      } else if (!cls) {
+        // If class isn't found
+        res.send({success: false,
+          message: 'Class not found'});
+      } else {
+        var students = cls.students;
+        User.find({username: req.body.username}, function(err, user) {
+          if (err) {
+            res.send(err);
+          } else if (students.indexOf(req.body.username) > -1) {
+            // If username already exists in cls.students
+            res.send({success: false,
+              message: 'User already exists in class.'});
+          } else if ( students.length >= cls.maxStudents ) {
+            // If array is already at capacity
+            res.send({success: false,
+              message: 'Max students reached.'});
+          } else {
+            var userClasses = [];
 
-          User.find({username: req.body.username}, function(err, user) {
-            if (err) throw err;
-            userClasses = user.classes;
-          });
+            User.find({username: req.body.username}, function(err, user) {
+              if (err) throw err;
+              userClasses = user.classes;
+            });
 
-          userClasses.push(cls.name);
+            userClasses.push(cls.name);
 
-          User.findOneAndUpdate({username: req.body.username},
-            {$set: {classes: userClasses}}, function(err, user) {
-              if (err) return res.send(err);
-          });
+            User.findOneAndUpdate({username: req.body.username},
+              {$set: {classes: userClasses}}, function(err, user) {
+                if (err) return res.send(err);
+            });
 
-          students.push(req.body.username);
+            students.push(req.body.username);
 
-          Class.findOneAndUpdate({_id: req.params.classId},
-            {$set: {students: students}}, function(err, cls) {
-              if (err) return res.send(err);
-              return res.send({success: true,
-                message: 'added ' + req.body.username + ' to class.'
-              });
-          });
-        }
-      });
-    }
-  });
+            Class.findOneAndUpdate({_id: req.params.classId},
+              {$set: {students: students}}, function(err, cls) {
+                if (err) return res.send(err);
+                return res.send({success: true,
+                  message: 'added ' + req.body.username + ' to class.'
+                });
+            });
+          }
+        });
+      }
+    });
+  } else {
+    return res.send({success: false,
+      message: 'You are not authorized to add to a class.'});
+  }
 };
 
+// deleteStudent() deletes a student to a class @ POST /class/:classId/students/delete
+// Requires: User is a part of writeAccess user classes
+
 exports.deleteStudent = function(req, res) {
-  Class.findById(req.params.classId, function(err, cls) {
-    if (err) {
-      res.send(err);
-    } else if (!cls) {
-      // If class isn't found
-      res.send({success: false, message: 'Class not found'});
-    } else {
-      var students = cls.students;
-      User.find({username: req.body.username}, function(err, user) {
-        if (err) {
-          res.send(err);
-        } else if (students.indexOf(req.body.username) === -1) {
-          // If username already exists in cls.students
-          res.send({success: false, message: 'User does not exist in class.'});
-        } else if ( students.length <= 0 ) {
-          // If array is already at capacity
-          res.send({success: false, message: 'Invalid length.'});
-        } else {
-          var userClasses = [];
+  var decoded = req.decoded;
+  if (writeAccess.indexOf(decoded.user_class) != -1) {
+    Class.findById(req.params.classId, function(err, cls) {
+      if (err) {
+        res.send(err);
+      } else if (!cls) {
+        // If class isn't found
+        res.send({success: false, message: 'Class not found'});
+      } else {
+        var students = cls.students;
+        User.find({username: req.body.username}, function(err, user) {
+          if (err) {
+            res.send(err);
+          } else if (students.indexOf(req.body.username) === -1) {
+            // If username already exists in cls.students
+            res.send({success: false, message: 'User does not exist in class.'});
+          } else if ( students.length <= 0 ) {
+            // If array is already at capacity
+            res.send({success: false, message: 'Invalid length.'});
+          } else {
+            var userClasses = [];
 
-          User.find({username: req.body.username}, function(err, user) {
-            if (err) throw err;
-            userClasses = user.classes;
-          });
+            User.find({username: req.body.username}, function(err, user) {
+              if (err) throw err;
+              userClasses = user.classes;
+            });
 
-          // Remove class from user's class list
-          userClasses.splice(userClasses.indexOf(req.body.username), 1);
-          User.findOneAndUpdate({username: req.body.username}, {$set: {classes: userClasses}}, function(err, user) {
-            if (err) return res.send(err);
-          });
+            // Remove class from user's class list
+            userClasses.splice(userClasses.indexOf(req.body.username), 1);
+            User.findOneAndUpdate({username: req.body.username},
+              {$set: {classes: userClasses}}, function(err, user) {
+                if (err) return res.send(err);
+            });
 
-          // Remove user from class' student list
-          students.splice(students.indexOf(req.body.username), 1);
-          Class.findOneAndUpdate({_id: req.params.classId}, {$set: {students: students}}, function(err, cls) {
-            if (err) return res.send(err);
-            return res.send({success: true, message: 'removed ' + req.body.username + ' from class.'});
-          });
-        }
-      });
-    }
-  });
+            // Remove user from class' student list
+            students.splice(students.indexOf(req.body.username), 1);
+            Class.findOneAndUpdate({_id: req.params.classId}, {$set: {students: students}}, function(err, cls) {
+              if (err) return res.send(err);
+              return res.send({success: true,
+                message: 'removed ' + req.body.username + ' from class.'});
+            });
+          }
+        });
+      }
+    });
+  } else {
+    return res.send({success: false,
+      message: 'You are not authorized to delete from a class.'});
+  }
 };

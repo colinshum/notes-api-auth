@@ -16,7 +16,7 @@ exports.listNotes = function(req, res) {
   Note.find({}, function(err, note) {
     if (err) return res.send(err);
     res.json(note);
-  });
+  }).sort({pinned: -1});
 };
 
 // getPinned() returns a JSON object of pinned notes
@@ -100,4 +100,4 @@ exports.getClass = function(req, res) {
     if (err) return res.send({status: 'error'});
     res.json(notes);
   }).sort({'pinned': -1});
-}
+};

@@ -1,3 +1,8 @@
+// TODO:
+//  1. Mongo based rate limiting
+//  2. Unit testing using Mocha/SuperTest
+//  3. Clean up JSON responses
+
 // Require modules and config files
 var jwt = require('jsonwebtoken');
 var express = require('express');
@@ -29,7 +34,7 @@ app.post('/register', function(req, res) {
   var newUser = new User(req.body);
 
   newUser.save(function(err, user) {
-    if (err) throw err;
+    if (err) return res.send(err);
     return res.json(user);
   });
 });
