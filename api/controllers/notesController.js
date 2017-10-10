@@ -67,7 +67,7 @@ exports.userNotes = function(req, res) {
       res.json(note);
     }).sort({'pinned': -1});
   });
-
+};
 
 // updateNote() updates a given Note at PUT /notes/id/:noteId
 // It does not require the entire object to be redefined.
@@ -99,5 +99,5 @@ exports.getClass = function(req, res) {
   Note.find({'class': req.params.class}, function(err, notes) {
     if (err) return res.send({status: 'error'});
     res.json(notes);
-  }).sort({'pinned': -1})
+  }).sort({'pinned': -1});
 }
